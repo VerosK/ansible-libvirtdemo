@@ -1,0 +1,16 @@
+
+# no devices are being setup by default
+netconfig_interfaces: {}
+
+#netconfig_interfaces:
+#  - name: lan42
+#    activate: yes
+#    sysconfig_filename: /etc/sysconfig/network-scripts/ifcfg-lan42
+#    config: |
+#      DEVICE=lan42
+#      ONBOOT=yes
+#      TYPE=Bridge
+#      BOOTPROTO=static
+#      NM_CONTROLLED=no
+#      IPADDR=192.168.42.254
+#      NETMASK=255.255.255.0

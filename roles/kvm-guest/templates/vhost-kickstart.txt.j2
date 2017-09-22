@@ -1,0 +1,46 @@
+# {{ ansible_managed }}
+
+# CentOS 7 - kickstart
+#
+# Password for the newly installed machine is 'nbusr123'. Change it.
+
+text
+install
+url --url {{ kvm_guest_install_location }} {% if http_proxy is defined %}--proxy {{ http_proxy }}{% endif %}
+
+cdrom
+lang en_US.UTF-8
+keyboard us
+
+network --device eth0 --bootproto static --hostname {{hostname}} --ip={{kvm_guest_network_ip_address}} --netmask={{kvm_guest_network_netmask}} --gateway={{kvm_guest_network_gateway}} --nameserver={{kvm_guest_network_resolver}}
+
+rootpw nbusr123
+firewall --enabled --port=22:tcp
+authconfig --enableshadow --enablemd5
+selinux --permissive
+timezone --utc Europe/Prague
+bootloader --location=mbr
+
+# The following is the partition information you requested
+clearpart --all
+part /boot --fstype ext3 --size=1024
+part pv.2 --size=1024 --grow
+volgroup {{ hostname }} --pesize=32768 pv.2
+logvol / --fstype ext4 --name=root --vgname={{hostname}} --size=2048 --grow
+logvol swap --fstype swap --name=swap --vgname={{hostname}} --size=512 --grow --maxsize=4196
+
+reboot
+
+%packages
+vim-minimal
+mc
+%end packages
+
+%post
+#sed -i 's/rhgb quiet//' /etc/grub.conf
+mkdir /root/.ssh
+echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAoscoe45CCpD4/L7eNcSwLslDu6dnoDOmVkptXD78Zzy84vqUyWsFWIV7egTHdK+QAzmoX1QtsZuz3WmpJibjx3FtcN5Sr7a85gcWY2jI/g0zX1M64b/WA1Iatrct9jXIqUHC6movnoH6xLheCMA4faAcTDdrW9tVH1wfxPdES/qSzZ2SXDEiKzed34MdBPOpHUwiZaIUg4t5wkr9ZmVzeWpguJMntZs8sr9XkAY4DC87Ui47G4NJeqWa8TT458Sy6k5ZT5GeldNuYt/dNoFH5/AtZXJQPjejeI9BS9F45F2geH8ZuWojSi3x8T/Liy5a1ZpiFwhwfkoJdVYo4XBsoQ== Very Secret Key' >> /root/.ssh/authorized_keys
+
+%end post
+
+# done

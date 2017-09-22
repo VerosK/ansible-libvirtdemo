@@ -1,0 +1,62 @@
+<!-- jinja -->
+<domain type='kvm'>
+  <name>{{ hostname }}</name>
+  <memory unit='MiB'>{{ kvm_guest_memory_size }}</memory>
+  <currentMemory unit='MiB'>{{kvm_guest_memory_size}}</currentMemory>
+  <vcpu>{{kvm_guest_cpu_count}}</vcpu>
+  <os>
+    <type arch='x86_64' machine='rhel7'>hvm</type>
+    <boot dev='hd'/>
+    <boot dev='network'/>
+    <bootmenu enable='yes'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <cpu mode='custom' match='exact'>
+    <model fallback='allow'>cpu64-rhel7</model>
+  </cpu>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/libexec/qemu-kvm</emulator>
+    <disk type='block' device='disk'>
+      <driver name='qemu' type='raw'/>
+      <source dev='/{{lv_volume}}'/>
+      <target dev='vda' bus='virtio'/>
+      <serial>{{ ether.replace(':','') }}</serial>
+    </disk>
+    <controller type='usb' index='0'>
+    </controller>
+    {% if kvm_guest_networks is defined %}
+    {% for a_network in kvm_guest_networks %}
+    <interface type='network'>
+      <mac address='{{ a_network.ether }}'/>
+      <source network='{{ a_network.bind_to }}'/>
+      <model type='virtio'/>
+    </interface>
+    {% endfor %}
+    {% else %}
+    <interface type='network'>
+      <mac address='{{ kvm_guest_mac_address }}'/>
+      <source network='private'/>
+      <model type='virtio'/>
+    </interface>
+    {% endif %}
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <graphics type='vnc' port='-1' autoport='yes'/>
+    <video>
+      <model type='cirrus' vram='4096' heads='1'/>
+    </video>
+    <memballoon model='virtio' />
+  </devices>
+</domain>

@@ -1,0 +1,63 @@
+---
+- name: Create LVM volume
+  lvol:
+    lv: "{{hostname}}"
+    size: "{{kvm_guest_storage_size}}"
+    vg: "{{kvm_guest_hypervisor_vg_pool}}"
+    state: present
+  register: lvol_change
+  delegate_to: "{{kvm_guest_hypervisor}}"
+
+- name: Set storage name
+  set_fact: lv_volume=/dev/{{kvm_guest_hypervisor_vg_pool}}/{{hostname}}
+
+- name: Zero LVM volume boot sector
+  shell: "/bin/dd if=/dev/zero of={{lv_volume}} bs=1024 count=1"
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  when: lvol_change.changed
+
+- name: Check status of virtual machine
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  virt: name="{{hostname}}" command=status
+  ignore_errors: yes
+  register: virt_guest
+
+- name: Debug
+  debug: var=virt_guest
+
+- name: Create virtinstall template
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  when: "'failed' in virt_guest"
+  template:
+    dest: "/tmp/install-{{hostname}}.sh"
+    src: vhost-install.sh.j2
+    mode: 0700
+
+- name: Create kickstart
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  when: "'failed' in virt_guest"
+  template:
+    dest: "/tmp/kickstart-{{hostname}}.txt"
+    src: vhost-kickstart.txt.j2
+
+- name: Start installation
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  when: "'failed' in virt_guest"
+  shell: chdir=/tmp /tmp/install-{{hostname}}.sh
+
+- name: Make sure guest is running
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  virt: name="{{hostname}}" state=running
+  when: guest_autostart
+
+- name: Make sure guest is autostarted
+  delegate_to: "{{kvm_guest_hypervisor}}"
+  virt: name="{{hostname}}" command=autostart
+  when: guest_autostart
+
+- name: Make sure machine is started
+  action: ping
+  retries: 10
+  delay: 10
+  when: guest_autostart
+

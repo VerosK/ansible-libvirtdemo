@@ -1,0 +1,53 @@
+---
+- name: Install libvirt to hypervisor
+  yum:
+    name: '{{item}}'
+    state: installed
+  with_items:
+    - libvirt-python
+    - python-lxml
+    - virt-install
+    - libvirt-daemon-kvm
+
+- name: Enable libvirtd
+  service:
+    name: libvirtd
+    state: started
+    enabled: yes
+
+- name: Set-up networking
+  virt_net:
+     state: present
+     name: '{{ item.name }}'
+     xml: '{{ lookup("template","bridge.xml.j2") }}'
+  with_items: '{{ kvm_hypervisor_virt_networks }}'
+
+- name: Start networks
+  virt_net:
+     autostart: "yes"
+     state: active
+     name: '{{ item.name }}'
+  with_items: '{{ kvm_hypervisor_virt_networks }}'
+
+- name: Ensure network autostart
+  virt_net:
+     autostart: 'yes'
+     name: '{{ item.name }}'
+  with_items: '{{ kvm_hypervisor_virt_networks }}'
+
+- name: Install libvirt to hypervisor
+  yum:
+    name: '{{ item }}'
+    state: installed
+  with_items:
+    - python-firewall
+
+- name: Enable DNS lookups services
+  firewalld:
+     service: "{{ item }}"
+     state: enabled
+     zone: public
+     immediate: yes
+     permanent: yes
+  with_items: [ dns ]
+  ignore_errors: yes # ignore when no firewalld is present

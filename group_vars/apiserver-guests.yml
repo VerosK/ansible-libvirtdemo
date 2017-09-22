@@ -1,0 +1,3 @@
+kvm_guest_memory_size: 1224
+kvm_guest_storage_size: 6G
+kvm_guest_cpu_count: 2

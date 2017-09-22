@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# {{ ansible_managed }}
+
+virt-install \
+    --connect qemu:///system \
+    --name={{hostname}} \
+    --memory={{kvm_guest_memory_size}} \
+    --disk path={{lv_volume}},bus=virtio,serial={{hostname}} \
+    --network=bridge:{{kvm_virt_network}},model=virtio,mac={{kvm_guest_mac_address}} \
+    --virt-type=kvm \
+    --os-type linux \
+    --os-variant rhel7 \
+    --accelerate \
+    --arch=x86_64 \
+    --vcpus={{kvm_guest_cpu_count}} \
+    --noautoconsole \
+    --hvm \
+    --location={{kvm_guest_install_location}} \
+    --initrd-inject=/tmp/kickstart-{{hostname}}.txt \
+    --extra-args="text ksdevice=eth0 ks=file:///kickstart-{{hostname}}.txt ip={{kvm_guest_network_ip_address}} netmask={{kvm_guest_network_netmask}} gateway={{kvm_guest_network_gateway}} nameserver={{kvm_guest_network_resolver}}  locale=en_US keyboard=us console=tty0 console=ttyS0"
+
+#    --extra-args="text ks=file:///kickstart-{{hostname}}.txt locale=en_US keyboard=us console=ttyS0"
+
+# done

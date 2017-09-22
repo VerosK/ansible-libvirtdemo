@@ -1,0 +1,13 @@
+kvm:
+  hypervisor: ladybird
+  vg_pool: virtual
+  virsh_pool: virtual
+
+guest_autostart: true
+
+kvm_mac_base: "E4:98:D1"  # Microsoft Mobile Oy # ex-Nokia
+kvm_guest_base_address: "192.168.21"
+kvm_virt_network: 'lan21'
+
+kvm_guest_install_location: http://ftp.cvut.cz/centos/7/os/x86_64/
+kvm_guest_http_proxy: http://192.168.21.43:3128/

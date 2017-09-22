@@ -1,0 +1,11 @@
+<pool type='logical'>
+  <name>{{item.name}}</name>
+  <source>
+    <device path='/dev/sdc'/>
+    <name>slow</name>
+    <format type='lvm2'/>
+  </source>
+  <target>
+    <path>/dev/slow</path>
+  </target>
+</pool>

@@ -1,0 +1,15 @@
+[hypervisors]
+ladybird ansible_user=root ansible_ssh_host=192.168.21.XX
+
+[ladybird-guests]
+#etcd-1   ansible_user=root ansible_ssh_host=192.168.21.101
+#etcd-2   ansible_user=root ansible_ssh_host=192.168.21.102
+#etcd-3   ansible_user=root ansible_ssh_host=192.168.21.103
+
+apiserver-1 ansible_user=root ansible_ssh_host=192.168.21.121
+apiserver-2 ansible_user=root ansible_ssh_host=192.168.21.122
+apiserver-3 ansible_user=root ansible_ssh_host=192.168.21.123
+
+
+[guests:children]
+ladybird-guests

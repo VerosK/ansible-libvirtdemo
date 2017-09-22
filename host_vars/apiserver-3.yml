@@ -1,0 +1,4 @@
+hostname: apiserver-3
+
+kvm_guest_mac_address: "{{ kvm_mac_base }}:67:00:03"
+kvm_guest_network_ip_address: '{{ kvm_guest_base_address }}.123'

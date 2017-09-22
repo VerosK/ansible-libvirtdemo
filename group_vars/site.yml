@@ -1,0 +1,33 @@
+---
+- name: Set up hypervisors
+  hosts: hypervisors
+  pre_tasks:
+    - name: Install bridge utils
+      yum:
+        name: bridge-utils
+        state: installed
+
+    - name: Enable ip-forward on boot
+      copy:
+        content: 'net.ipv4.ip_forward = 1'
+        dest: /etc/sysctl.d/50-ipforward.conf
+  roles:
+    - role: local_netconfig
+    - role: VerosK.kvm-hypervisor
+
+- name: Set-up virtualhosts
+  hosts: kvm-guests
+  gather_facts: False
+  tags: kvm-guests
+  serial: 12
+  roles:
+    - role: kvm-guest
+      tags: kvm-guest
+
+#  tasks:
+#    - lineinfile:
+#         dest: /etc/yum.conf
+#         line: 'proxy={{http_proxy}}'
+#         regexp: '^proxy='
+#      when: 'http_proxy is defined'
+#      tags: yum_proxy
